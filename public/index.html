@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Instagram — Scraping de perfil público</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #0c0f14;
+        --panel: #141a24;
+        --elevated: #1b2330;
+        --border: #2a3545;
+        --text: #e8edf4;
+        --muted: #8b9cb3;
+        --accent: #e1306c;
+        --accent-dim: #c42d5f;
+        --ok: #3dd68c;
+        --warn: #f5a524;
+        --err: #f31260;
+        --gradient: linear-gradient(135deg, #f58529, #dd2a7b, #8134af);
+        --radius: 14px;
+        --shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: "DM Sans", system-ui, sans-serif;
+        background: radial-gradient(1200px 600px at 10% -10%, #1a1430 0%, transparent 55%),
+          radial-gradient(900px 500px at 100% 0%, #301a24 0%, transparent 50%), var(--bg);
+        color: var(--text);
+        line-height: 1.5;
+      }
+
+      a {
+        color: #9cc8ff;
+        text-decoration: none;
+      }
+
+      a:hover {
+        text-decoration: underline;
+      }
+
+      .wrap {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 2rem 1.25rem 4rem;
+      }
+
+      header.hero {
+        display: grid;
+        gap: 0.75rem;
+        margin-bottom: 2rem;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.35rem 0.75rem;
+        border-radius: 999px;
+        background: rgba(225, 48, 108, 0.12);
+        border: 1px solid rgba(225, 48, 108, 0.35);
+        color: #ffb3cd;
+        font-size: 0.8rem;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+        width: fit-content;
+      }
+
+      .badge::before {
+        content: "";
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--gradient);
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(1.75rem, 4vw, 2.35rem);
+        font-weight: 700;
+        letter-spacing: -0.03em;
+      }
+
+      .lede {
+        margin: 0;
+        color: var(--muted);
+        max-width: 62ch;
+        font-size: 1.05rem;
+      }
+
+      .grid {
+        display: grid;
+        gap: 1.25rem;
+      }
+
+      @media (min-width: 900px) {
+        .grid-2 {
+          grid-template-columns: 340px 1fr;
+          align-items: start;
+        }
+      }
+
+      .card {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 1.35rem 1.35rem 1.5rem;
+        box-shadow: var(--shadow);
+      }
+
+      .card h2 {
+        margin: 0 0 1rem;
+        font-size: 1.05rem;
+        font-weight: 600;
+      }
+
+      label {
+        display: block;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--muted);
+        margin-bottom: 0.35rem;
+      }
+
+      .input-row {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+
+      input[type="text"],
+      input[type="number"] {
+        flex: 1;
+        min-width: 180px;
+        padding: 0.75rem 0.9rem;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        background: var(--elevated);
+        color: var(--text);
+        font-size: 1rem;
+        font-family: inherit;
+      }
+
+      input:focus {
+        outline: 2px solid rgba(225, 48, 108, 0.45);
+        outline-offset: 1px;
+      }
+
+      button.primary {
+        border: none;
+        cursor: pointer;
+        padding: 0.8rem 1.25rem;
+        border-radius: 10px;
+        font-weight: 700;
+        font-family: inherit;
+        font-size: 0.95rem;
+        color: #fff;
+        background: var(--gradient);
+        box-shadow: 0 10px 30px rgba(221, 42, 123, 0.35);
+        transition: transform 0.12s ease, filter 0.12s ease;
+      }
+
+      button.primary:hover:not(:disabled) {
+        filter: brightness(1.05);
+        transform: translateY(-1px);
+      }
+
+      button.primary:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+      }
+
+      .hint {
+        margin-top: 0.85rem;
+        font-size: 0.85rem;
+        color: var(--muted);
+      }
+
+      .toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1rem;
+      }
+
+      .pill {
+        font-size: 0.78rem;
+        padding: 0.25rem 0.6rem;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        color: var(--muted);
+        font-family: "JetBrains Mono", monospace;
+      }
+
+      .pill.ok {
+        border-color: rgba(61, 214, 140, 0.45);
+        color: #b8f5d0;
+      }
+
+      .pill.err {
+        border-color: rgba(243, 18, 96, 0.45);
+        color: #ffc4d4;
+      }
+
+      .alert {
+        padding: 0.85rem 1rem;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        font-size: 0.92rem;
+        margin-bottom: 1rem;
+      }
+
+      .alert.warn {
+        background: rgba(245, 165, 36, 0.1);
+        border-color: rgba(245, 165, 36, 0.35);
+        color: #ffe7c2;
+      }
+
+      .alert.err {
+        background: rgba(243, 18, 96, 0.1);
+        border-color: rgba(243, 18, 96, 0.35);
+        color: #ffd0e0;
+      }
+
+      .profile-block {
+        display: grid;
+        gap: 0.65rem;
+      }
+
+      .kv {
+        display: grid;
+        grid-template-columns: 140px 1fr;
+        gap: 0.5rem 1rem;
+        font-size: 0.92rem;
+      }
+
+      .kv dt {
+        margin: 0;
+        color: var(--muted);
+        font-weight: 600;
+      }
+
+      .kv dd {
+        margin: 0;
+        word-break: break-word;
+      }
+
+      .posts {
+        display: grid;
+        gap: 0.65rem;
+      }
+
+      .post-item {
+        display: flex;
+        gap: 0.75rem;
+        align-items: flex-start;
+        padding: 0.65rem 0.75rem;
+        border-radius: 10px;
+        background: var(--elevated);
+        border: 1px solid var(--border);
+      }
+
+      .post-item .idx {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.8rem;
+        color: var(--muted);
+        min-width: 1.75rem;
+      }
+
+      .post-item a {
+        word-break: break-all;
+        font-size: 0.9rem;
+      }
+
+      .json-toggle {
+        margin-top: 1rem;
+      }
+
+      details.json-toggle summary {
+        cursor: pointer;
+        font-weight: 600;
+        color: var(--muted);
+      }
+
+      pre {
+        margin: 0.75rem 0 0;
+        padding: 1rem;
+        border-radius: 10px;
+        background: #0a0d12;
+        border: 1px solid var(--border);
+        overflow: auto;
+        max-height: 360px;
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.78rem;
+        line-height: 1.45;
+      }
+
+      .skeleton {
+        height: 120px;
+        border-radius: 10px;
+        background: linear-gradient(90deg, var(--elevated), #222b3a, var(--elevated));
+        background-size: 200% 100%;
+        animation: sh 1.2s ease infinite;
+      }
+
+      @keyframes sh {
+        0% {
+          background-position: 0% 0;
+        }
+        100% {
+          background-position: -200% 0;
+        }
+      }
+
+      footer {
+        margin-top: 2.5rem;
+        padding-top: 1.25rem;
+        border-top: 1px solid var(--border);
+        color: var(--muted);
+        font-size: 0.88rem;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem 1.25rem;
+        justify-content: space-between;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header class="hero">
+        <span class="badge">Proyecto · scraping responsable</span>
+        <h1>Extractor de perfil público</h1>
+        <p class="lede">
+          Ingresá un nombre de usuario válido. El sistema intenta primero en modo
+          <strong>anónimo</strong> (sin cookies) y, si Instagram pide inicio de sesión, reintenta con
+          <strong>sesión guardada</strong> si configuraste <code>instagram-auth.json</code>.
+        </p>
+      </header>
+
+      <div class="grid grid-2">
+        <section class="card">
+          <h2>Parámetros</h2>
+          <form id="form">
+            <label for="username">Usuario de Instagram</label>
+            <div class="input-row">
+              <input
+                id="username"
+                name="username"
+                type="text"
+                autocomplete="off"
+                placeholder="ej. instagram"
+                required
+              />
+            </div>
+            <label for="minPosts" style="margin-top: 1rem">Mínimo de publicaciones deseadas</label>
+            <div class="input-row">
+              <input id="minPosts" name="minPosts" type="number" min="1" max="30" value="10" />
+              <button class="primary" type="submit" id="btn">Obtener datos</button>
+            </div>
+            <p class="hint">
+              Documentación paso a paso:
+              <a href="/docs.html">docs.html</a>
+            </p>
+          </form>
+        </section>
+
+        <section class="card" id="output-card">
+          <div class="toolbar">
+            <h2 style="margin: 0">Resultado</h2>
+            <span class="pill" id="mode-pill">esperando…</span>
+          </div>
+          <div id="out">
+            <p style="margin: 0; color: var(--muted)">
+              Los datos aparecerán aquí después de ejecutar una búsqueda.
+            </p>
+          </div>
+        </section>
+      </div>
+
+      <footer>
+        <span>Uso académico: respetá los términos de Instagram y no compartas cookies en el repositorio.</span>
+        <span><a href="/docs.html">Ver documentación visual</a></span>
+      </footer>
+    </div>
+
+    <script>
+      const form = document.getElementById("form");
+      const out = document.getElementById("out");
+      const btn = document.getElementById("btn");
+      const modePill = document.getElementById("mode-pill");
+
+      function esc(s) {
+        return String(s ?? "")
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
+
+      function setLoading(loading) {
+        btn.disabled = loading;
+        if (loading) {
+          modePill.textContent = "ejecutando…";
+          modePill.className = "pill";
+          out.innerHTML = '<div class="skeleton"></div><div class="skeleton" style="height:80px;margin-top:10px"></div>';
+        }
+      }
+
+      function render(data) {
+        const ok = data.ok;
+        modePill.textContent = data.mode ? "modo: " + data.mode : "—";
+        modePill.className = "pill " + (ok ? "ok" : "err");
+
+        let html = "";
+
+        if (data.warning) {
+          html += `<div class="alert warn"><strong>Advertencia:</strong> ${esc(data.warning.message)}</div>`;
+        }
+
+        if (!ok && data.error) {
+          html += `<div class="alert err"><strong>Error:</strong> ${esc(data.error.message)}</div>`;
+        }
+        if (data.hint) {
+          html += `<div class="alert warn"><strong>Sugerencia:</strong> ${esc(data.hint)}</div>`;
+        }
+
+        const p = data.profile || {};
+        html += `<div class="profile-block">
+          <h3 style="margin:0 0 0.25rem;font-size:1rem">Perfil</h3>
+          <dl class="kv">
+            <dt>Usuario</dt><dd>${esc(data.username)}</dd>
+            <dt>URL</dt><dd><a href="${esc(data.profileUrl)}" target="_blank" rel="noopener">${esc(
+          data.profileUrl
+        )}</a></dd>
+            <dt>Nombre</dt><dd>${esc(p.fullName || "—")}</dd>
+            <dt>Bio / meta</dt><dd>${esc(p.biography || p.metaDescription || "—")}</dd>
+            <dt>Seguidores</dt><dd>${esc(p.followersLabel || "—")}</dd>
+            <dt>Seguidos</dt><dd>${esc(p.followingLabel || "—")}</dd>
+            <dt>Publicaciones (etiqueta)</dt><dd>${esc(p.postsLabel || "—")}</dd>
+            <dt>og:title</dt><dd>${esc(p.ogTitle || "—")}</dd>
+          </dl>
+        </div>`;
+
+        const posts = data.posts || [];
+        html += `<h3 style="margin:1.25rem 0 0.5rem;font-size:1rem">Publicaciones (${posts.length})</h3>`;
+        if (!posts.length) {
+          html += `<p style="color:var(--muted);margin:0">No se obtuvieron enlaces de publicaciones.</p>`;
+        } else {
+          html += `<div class="posts">${posts
+            .map(
+              (url, i) =>
+                `<div class="post-item"><span class="idx">${i + 1}</span><a href="${esc(
+                  url
+                )}" target="_blank" rel="noopener">${esc(url)}</a></div>`
+            )
+            .join("")}</div>`;
+        }
+
+        html += `<details class="json-toggle"><summary>JSON completo (para revisión / informe)</summary><pre>${esc(
+          JSON.stringify(data, null, 2)
+        )}</pre></details>`;
+
+        out.innerHTML = html;
+      }
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const username = document.getElementById("username").value.trim();
+        const minPosts = Number(document.getElementById("minPosts").value || 10);
+        setLoading(true);
+        try {
+          const res = await fetch("/api/scrape", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username, minPosts }),
+          });
+          const data = await res.json();
+          render(data);
+        } catch (err) {
+          modePill.textContent = "error de red";
+          modePill.className = "pill err";
+          out.innerHTML = `<div class="alert err">No se pudo contactar al servidor. ¿Está corriendo <code>npm start</code>?</div>`;
+        } finally {
+          btn.disabled = false;
+        }
+      });
+    </script>
+  </body>
+</html>
