@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Documentación — Instagram public scraper</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;0,9..40,700&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #0a0c10;
+        --panel: #121722;
+        --line: #243041;
+        --text: #e7ecf3;
+        --muted: #94a3b8;
+        --accent: #e11d48;
+        --accent2: #a855f7;
+        --ok: #22c55e;
+        --warn: #f59e0b;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: "DM Sans", system-ui, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        line-height: 1.6;
+      }
+      .layout {
+        display: grid;
+        min-height: 100vh;
+      }
+      @media (min-width: 960px) {
+        .layout {
+          grid-template-columns: 280px 1fr;
+        }
+      }
+      nav {
+        position: sticky;
+        top: 0;
+        align-self: start;
+        padding: 1.5rem 1.25rem 2rem;
+        border-bottom: 1px solid var(--line);
+        background: rgba(10, 12, 16, 0.92);
+        backdrop-filter: blur(10px);
+      }
+      @media (min-width: 960px) {
+        nav {
+          height: 100vh;
+          border-bottom: none;
+          border-right: 1px solid var(--line);
+        }
+      }
+      nav h1 {
+        margin: 0 0 0.5rem;
+        font-size: 1.05rem;
+        letter-spacing: -0.02em;
+      }
+      nav p {
+        margin: 0 0 1rem;
+        font-size: 0.85rem;
+        color: var(--muted);
+      }
+      nav a.back {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        font-size: 0.88rem;
+        color: #93c5fd;
+        text-decoration: none;
+        margin-bottom: 1rem;
+      }
+      nav a.back:hover {
+        text-decoration: underline;
+      }
+      .toc {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: grid;
+        gap: 0.35rem;
+      }
+      .toc a {
+        display: block;
+        padding: 0.45rem 0.55rem;
+        border-radius: 8px;
+        color: var(--text);
+        text-decoration: none;
+        font-size: 0.88rem;
+        border: 1px solid transparent;
+      }
+      .toc a:hover {
+        background: #1a2230;
+        border-color: var(--line);
+      }
+      main {
+        padding: 2rem 1.5rem 4rem;
+        max-width: 900px;
+      }
+      section {
+        margin-bottom: 2.75rem;
+        scroll-margin-top: 1.25rem;
+      }
+      h2 {
+        margin: 0 0 0.75rem;
+        font-size: 1.45rem;
+        letter-spacing: -0.02em;
+      }
+      h3 {
+        margin: 1.5rem 0 0.5rem;
+        font-size: 1.05rem;
+      }
+      p,
+      li {
+        color: #cbd5e1;
+        font-size: 0.98rem;
+      }
+      .callout {
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 1rem 1.1rem;
+        background: #151b27;
+        margin: 1rem 0;
+      }
+      .callout.warn {
+        border-color: rgba(245, 158, 11, 0.45);
+        background: rgba(245, 158, 11, 0.08);
+      }
+      .callout.ok {
+        border-color: rgba(34, 197, 94, 0.45);
+        background: rgba(34, 197, 94, 0.07);
+      }
+      .flow {
+        display: grid;
+        gap: 0.65rem;
+        margin: 1rem 0;
+      }
+      .step {
+        display: flex;
+        gap: 0.75rem;
+        align-items: flex-start;
+        padding: 0.75rem 0.85rem;
+        border-radius: 12px;
+        border: 1px solid var(--line);
+        background: #111827;
+      }
+      .step .n {
+        flex: 0 0 28px;
+        height: 28px;
+        border-radius: 8px;
+        display: grid;
+        place-items: center;
+        font-size: 0.8rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #f97316, #e11d48, #a855f7);
+        color: #fff;
+      }
+      code,
+      pre {
+        font-family: "JetBrains Mono", ui-monospace, monospace;
+        font-size: 0.86rem;
+      }
+      pre {
+        padding: 1rem;
+        border-radius: 12px;
+        background: #0b0f16;
+        border: 1px solid var(--line);
+        overflow: auto;
+        color: #e2e8f0;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.9rem;
+        margin: 1rem 0;
+      }
+      th,
+      td {
+        border: 1px solid var(--line);
+        padding: 0.55rem 0.65rem;
+        text-align: left;
+        vertical-align: top;
+      }
+      th {
+        background: #151b27;
+        color: #e2e8f0;
+      }
+      .tag {
+        display: inline-block;
+        padding: 0.15rem 0.45rem;
+        border-radius: 6px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        background: rgba(161, 85, 247, 0.2);
+        color: #e9d5ff;
+        border: 1px solid rgba(161, 85, 247, 0.35);
+      }
+      ul {
+        padding-left: 1.2rem;
+      }
+      .muted {
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="layout">
+      <nav>
+        <a class="back" href="https://github.com/CheffoPiu/webscraping">← Repositorio en GitHub</a>
+        <h1>Documentación del proyecto</h1>
+        <p>Scraping de perfiles públicos con Playwright: modo anónimo y respaldo con cookies.</p>
+        <p class="muted" style="font-size: 0.82rem; margin-top: -0.5rem">
+          <strong>GitHub Pages:</strong> aquí solo está la documentación estática. La interfaz que ejecuta el
+          scraping necesita <code>npm start</code> en tu máquina o un servidor con Node y Playwright (ver §5).
+        </p>
+        <ul class="toc">
+          <li><a href="#resumen">1. Resumen</a></li>
+          <li><a href="#objetivos">2. Objetivos y alcance</a></li>
+          <li><a href="#arquitectura">3. Arquitectura</a></li>
+          <li><a href="#flujo">4. Flujo anónimo → cookies</a></li>
+          <li><a href="#instalacion">5. Instalación</a></li>
+          <li><a href="#cookies">6. Cookies y sesión</a></li>
+          <li><a href="#api">7. API REST</a></li>
+          <li><a href="#datos">8. Datos extraídos</a></li>
+          <li><a href="#errores">9. Errores y advertencias</a></li>
+          <li><a href="#etica">10. Ética y límites</a></li>
+          <li><a href="#informe">11. Ideas para el informe</a></li>
+        </ul>
+      </nav>
+      <main>
+        <section id="resumen">
+          <h2>1. Resumen</h2>
+          <p>
+            Esta aplicación es un <span class="tag">demo académico</span> que permite ingresar un
+            <strong>nombre de usuario</strong> de Instagram, abrir su página pública con un navegador
+            controlado por <strong>Playwright</strong> (Chromium en modo headless) y devolver
+            <strong>metadatos visibles del perfil</strong> junto con hasta <strong>N enlaces</strong> a
+            publicaciones detectadas en la rejilla (por defecto se pide un mínimo de 10).
+          </p>
+          <div class="callout ok">
+            <strong>Estrategia en dos capas.</strong> Primero se intenta en modo
+            <strong>anónimo</strong> (sin cookies de sesión). Si Instagram muestra un muro de inicio
+            de sesión y no hay publicaciones en la rejilla, el sistema puede
+            <strong>reintentar</strong> usando un archivo de sesión (<code>storage state</code>) generado
+            con <code>npm run auth:setup</code>.
+          </div>
+        </section>
+
+        <section id="objetivos">
+          <h2>2. Objetivos y alcance</h2>
+          <ul>
+            <li>Demostrar <strong>web scraping</strong> sobre una SPA moderna sin Selenium ni BeautifulSoup.</li>
+            <li>Implementar un flujo <strong>usuario → validación → extracción → presentación</strong> en una interfaz web clara.</li>
+            <li>Incorporar el uso <strong>opcional</strong> de cookies vía <strong>Playwright storageState</strong>.</li>
+            <li>Documentar limitaciones técnicas y consideraciones de <strong>privacidad / ToS</strong>.</li>
+          </ul>
+          <p class="muted">
+            No se incluye descarga masiva de medios (imágenes/videos), ni bypass de captchas, ni rotación de
+            proxies: el foco es un trabajo de ingeniería reproducible y defendible.
+          </p>
+        </section>
+
+        <section id="arquitectura">
+          <h2>3. Arquitectura</h2>
+          <pre><code>┌─────────────┐     HTTP      ┌──────────────┐     Playwright    ┌───────────┐
+│  Navegador  │  ──────────►  │ Express API  │  ───────────────► │ Instagram │
+│  (index.html)│  JSON       │  /api/scrape │   Chromium headless │  (web)    │
+└─────────────┘              └──────────────┘                     └───────────┘
+                                    │
+                                    ▼
+                             src/scraper.js
+                             (anónimo → cookies)</code></pre>
+          <table>
+            <thead>
+              <tr>
+                <th>Componente</th>
+                <th>Rol</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>public/index.html</code></td>
+                <td>Interfaz para ingresar usuario, disparar el scraping y revisar resultados + JSON.</td>
+              </tr>
+              <tr>
+                <td><code>src/server.js</code></td>
+                <td>Servidor HTTP estático + endpoint <code>POST /api/scrape</code>.</td>
+              </tr>
+              <tr>
+                <td><code>src/scraper.js</code></td>
+                <td>Lógica de extracción: scroll suave, lectura del DOM, modo anónimo y reintento con sesión.</td>
+              </tr>
+              <tr>
+                <td><code>scripts/auth-setup.js</code></td>
+                <td>Asistente para guardar cookies de sesión en <code>instagram-auth.json</code> (fuera de Git).</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section id="flujo">
+          <h2>4. Flujo anónimo → cookies</h2>
+          <div class="flow">
+            <div class="step">
+              <div class="n">1</div>
+              <div>
+                <strong>Contexto limpio</strong>
+                <p class="muted" style="margin: 0.35rem 0 0">
+                  Se abre Chromium sin <code>storageState</code>: equivalente a un visitante sin sesión
+                  guardada.
+                </p>
+              </div>
+            </div>
+            <div class="step">
+              <div class="n">2</div>
+              <div>
+                <strong>Navegación al perfil</strong>
+                <p class="muted" style="margin: 0.35rem 0 0">
+                  URL directa <code>https://www.instagram.com/&lt;usuario&gt;/</code> (no hace falta “buscar” en
+                  el buscador de Instagram).
+                </p>
+              </div>
+            </div>
+            <div class="step">
+              <div class="n">3</div>
+              <div>
+                <strong>Scroll y extracción</strong>
+                <p class="muted" style="margin: 0.35rem 0 0">
+                  Se hace scroll moderado para cargar más celdas de la rejilla y se recolectan enlaces
+                  <code>/p/&lt;shortcode&gt;/</code>.
+                </p>
+              </div>
+            </div>
+            <div class="step">
+              <div class="n">4</div>
+              <div>
+                <strong>Reintento con sesión (opcional)</strong>
+                <p class="muted" style="margin: 0.35rem 0 0">
+                  Si el resultado es <code>LOGIN_WALL</code> y existe el archivo de sesión configurado, se
+                  repite el mismo proceso inyectando cookies mediante <code>storageState</code>.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="instalacion">
+          <h2>5. Instalación y ejecución</h2>
+          <h3>Requisitos</h3>
+          <ul>
+            <li>Node.js 18 o superior.</li>
+            <li>Conexión a Internet la primera vez (descarga de Chromium por Playwright).</li>
+          </ul>
+          <h3>Comandos</h3>
+          <pre><code>cd webscraping
+npm install
+npm start</code></pre>
+          <p class="muted">
+            Luego abrí <code>http://localhost:3000</code> (o el puerto definido en <code>.env</code>).
+          </p>
+          <h3>Instalación manual del navegador (si falla postinstall)</h3>
+          <pre><code>npx playwright install chromium</code></pre>
+          <h3>Publicar esta documentación en GitHub Pages</h3>
+          <p>
+            GitHub puede servir esta carpeta <code>/docs</code> como sitio web. Eso te da una
+            <strong>URL pública</strong> para compartir el manual del proyecto (no ejecuta el servidor Node).
+          </p>
+          <ol>
+            <li>Subí el repositorio a GitHub (rama <code>main</code> con la carpeta <code>docs/</code>).</li>
+            <li>En el repo: <strong>Settings → Pages</strong>.</li>
+            <li>
+              <strong>Build and deployment:</strong> Source = <em>Deploy from a branch</em>, Branch =
+              <code>main</code>, folder <code>/docs</code>, Save.
+            </li>
+            <li>
+              En uno o dos minutos la doc suele estar en
+              <code>https://&lt;tu-usuario&gt;.github.io/&lt;nombre-del-repo&gt;/</code>
+              (GitHub muestra la URL exacta en la misma pantalla de Pages).
+            </li>
+          </ol>
+          <div class="callout warn">
+            <strong>Importante:</strong> GitHub Pages no puede correr Express ni Playwright. Para usar el
+            formulario y el scraping desde internet necesitás desplegar la app en un servicio con Node (Railway,
+            Render, VPS, etc.) o seguir probando en <code>localhost</code>.
+          </div>
+        </section>
+
+        <section id="cookies">
+          <h2>6. Cookies y sesión segura</h2>
+          <p>
+            Las cookies de sesión son <strong>credenciales</strong>. Este proyecto las guarda solo en un
+            archivo local ignorado por Git, por ejemplo <code>instagram-auth.json</code>.
+          </p>
+          <h3>Generar el archivo de sesión</h3>
+          <pre><code>npm run auth:setup</code></pre>
+          <ol>
+            <li>Se abre Chromium en modo visible.</li>
+            <li>Iniciás sesión en Instagram manualmente.</li>
+            <li>Volvés a la terminal y presionás <strong>Enter</strong>.</li>
+            <li>Se escribe <code>instagram-auth.json</code> (o la ruta de <code>STORAGE_STATE_PATH</code>).</li>
+          </ol>
+          <div class="callout warn">
+            <strong>Nunca subas</strong> <code>instagram-auth.json</code> ni captures de pantalla con valores
+            de cookies al repositorio o al informe. Si se filtran, <strong>cerrá sesión</strong> en Instagram
+            y regenerá el archivo.
+          </div>
+          <h3>Variable de entorno</h3>
+          <p>Copiá <code>.env.example</code> a <code>.env</code> y ajustá si usás otra ruta:</p>
+          <pre><code>STORAGE_STATE_PATH=./instagram-auth.json
+PORT=3000</code></pre>
+        </section>
+
+        <section id="api">
+          <h2>7. API REST</h2>
+          <h3><code>POST /api/scrape</code></h3>
+          <p>Cuerpo JSON:</p>
+          <pre><code>{
+  "username": "usuario",
+  "minPosts": 10
+}</code></pre>
+          <p>Respuesta exitosa (ejemplo parcial):</p>
+          <pre><code>{
+  "ok": true,
+  "username": "usuario",
+  "profileUrl": "https://www.instagram.com/usuario/",
+  "mode": "anonymous",
+  "profile": { ... },
+  "posts": [ "https://www.instagram.com/p/XXXX/" ],
+  "stats": { "requestedMinPosts": 10, "collectedPosts": 12 }
+}</code></pre>
+          <h3>Otros endpoints</h3>
+          <ul>
+            <li><code>GET /api/health</code> — comprobación del servicio.</li>
+            <li><code>GET /api/validate-username?u=nombre</code> — validación básica del formato.</li>
+          </ul>
+        </section>
+
+        <section id="datos">
+          <h2>8. Datos extraídos</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Campo</th>
+                <th>Descripción</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>profile.fullName</code></td>
+                <td>Nombre mostrado si aparece en el encabezado.</td>
+              </tr>
+              <tr>
+                <td><code>profile.biography</code> / meta</td>
+                <td>Texto de bio o descripción meta cuando es visible.</td>
+              </tr>
+              <tr>
+                <td><code>profile.*Label</code></td>
+                <td>Cadenas de seguidores / seguidos / publicaciones si el DOM las expone.</td>
+              </tr>
+              <tr>
+                <td><code>posts[]</code></td>
+                <td>URLs de publicaciones encontradas en la rejilla (hasta el máximo configurado).</td>
+              </tr>
+            </tbody>
+          </table>
+          <p class="muted">
+            Instagram cambia el HTML con frecuencia: algunos campos pueden venir vacíos aun cuando el perfil es
+            público. Eso es normal en scraping y debe explicarse en el informe.
+          </p>
+        </section>
+
+        <section id="errores">
+          <h2>9. Errores y advertencias</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Código</th>
+                <th>Significado</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>NOT_FOUND</code></td>
+                <td>Usuario inexistente o página no disponible.</td>
+              </tr>
+              <tr>
+                <td><code>PRIVATE</code></td>
+                <td>Cuenta privada: no hay rejilla pública.</td>
+              </tr>
+              <tr>
+                <td><code>LOGIN_WALL</code></td>
+                <td>Instagram exige login o bloquea la vista; usar sesión con cookies.</td>
+              </tr>
+              <tr>
+                <td><code>FEW_POSTS</code></td>
+                <td>Advertencia: menos publicaciones de las solicitadas.</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section id="etica">
+          <h2>10. Ética, legalidad y buenas prácticas</h2>
+          <ul>
+            <li>Usá <strong>solo perfiles públicos</strong> y datos que un visitante podría ver en la web.</li>
+            <li>Respetá los <strong>Términos de uso</strong> de Instagram y las políticas de tu universidad.</li>
+            <li>Mantené <strong>baja frecuencia</strong> de solicitudes; este proyecto no está pensado para uso masivo.</li>
+            <li>En la defensa oral, contrastá scraping vs <strong>API oficial</strong> (Graph API) como alternativa empresarial.</li>
+          </ul>
+        </section>
+
+        <section id="informe">
+          <h2>11. Ideas para el informe final</h2>
+          <ul>
+            <li>Diagrama de secuencia: usuario → API → Playwright → Instagram.</li>
+            <li>Capturas de la interfaz y del JSON devuelto (sin datos sensibles).</li>
+            <li>Tabla de riesgos: bloqueos, cambios de DOM, dependencia de sesión.</li>
+            <li>Conclusión: cuándo tiene sentido el modo anónimo y cuándo el respaldo con cookies.</li>
+          </ul>
+          <p class="muted" style="margin-bottom: 3rem">Fin de la documentación.</p>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>
