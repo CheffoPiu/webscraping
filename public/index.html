@@ -212,6 +212,55 @@
         color: var(--muted);
       }
 
+      .fetch-option {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.65rem;
+        margin-top: 1.1rem;
+        cursor: pointer;
+        max-width: 100%;
+      }
+
+      .fetch-option input[type="checkbox"] {
+        width: 1.05rem;
+        height: 1.05rem;
+        margin: 0.2rem 0 0;
+        flex-shrink: 0;
+        accent-color: #dd2a7b;
+        cursor: pointer;
+      }
+
+      .fetch-option-body {
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+        min-width: 0;
+        line-height: 1.4;
+      }
+
+      .fetch-option-title {
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: var(--text);
+      }
+
+      .fetch-option-desc {
+        font-weight: 500;
+        font-size: 0.8rem;
+        color: var(--muted);
+        overflow-wrap: anywhere;
+      }
+
+      .fetch-option-desc code {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.76rem;
+        padding: 0.12rem 0.35rem;
+        border-radius: 6px;
+        background: var(--elevated);
+        border: 1px solid var(--border);
+        color: #c8d8f0;
+      }
+
       .toolbar {
         display: flex;
         flex-wrap: wrap;
@@ -520,11 +569,17 @@
               <input id="minPosts" name="minPosts" type="number" min="1" max="30" value="10" />
               <button class="primary" type="submit" id="btn">Obtener datos</button>
             </div>
-            <label
-              style="margin-top: 1rem; display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-weight: 600; color: var(--muted)"
-            >
-              <input id="fetchMedia" name="fetchMedia" type="checkbox" checked style="width: auto; min-width: auto" />
-              Descargar vista previa por publicación (más lento; guarda imágenes en <code>data/images</code> y JSON)
+            <label class="fetch-option" for="fetchMedia">
+              <input id="fetchMedia" name="fetchMedia" type="checkbox" checked />
+              <span class="fetch-option-body">
+                <span class="fetch-option-title">Descargar vista previa por publicación</span>
+                <span class="fetch-option-desc">
+                  Es más lento: abre cada publicación y guarda miniaturas en
+                  <code>data/images</code>
+                  y el listado en
+                  <code>data/latest_posts.json</code>.
+                </span>
+              </span>
             </label>
             <p class="hint">
               Documentación paso a paso:
