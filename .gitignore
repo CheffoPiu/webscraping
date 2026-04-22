@@ -3,4 +3,5 @@ node_modules/
 *.log
 instagram-auth.json
 storage-state.json
+data/
 .DS_Store

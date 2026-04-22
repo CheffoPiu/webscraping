@@ -10,17 +10,22 @@ const PORT = Number(process.env.PORT) || 3000;
 app.use(cors());
 app.use(express.json({ limit: "40kb" }));
 app.use(express.static(path.join(__dirname, "..", "public")));
+app.use("/data", express.static(path.join(__dirname, "..", "data")));
 
 app.post("/api/scrape", async (req, res) => {
   try {
-    const { username, minPosts } = req.body || {};
+    const { username, minPosts, fetchMedia, maxMediaFetch } = req.body || {};
     if (!username || typeof username !== "string") {
       return res.status(400).json({
         ok: false,
         error: { code: "BAD_REQUEST", message: "Falta el campo username." },
       });
     }
-    const data = await scrapeProfile(username, { minPosts });
+    const data = await scrapeProfile(username, {
+      minPosts,
+      fetchMedia: Boolean(fetchMedia),
+      maxMediaFetch,
+    });
     const status = data.ok ? 200 : 422;
     return res.status(status).json(data);
   } catch (err) {

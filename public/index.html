@@ -28,13 +28,22 @@
         --shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
       }
 
-      * {
+      *,
+      *::before,
+      *::after {
         box-sizing: border-box;
+      }
+
+      html {
+        overflow-x: hidden;
       }
 
       body {
         margin: 0;
         min-height: 100vh;
+        width: 100%;
+        max-width: 100vw;
+        overflow-x: clip;
         font-family: "DM Sans", system-ui, sans-serif;
         background: radial-gradient(1200px 600px at 10% -10%, #1a1430 0%, transparent 55%),
           radial-gradient(900px 500px at 100% 0%, #301a24 0%, transparent 50%), var(--bg);
@@ -52,9 +61,10 @@
       }
 
       .wrap {
+        width: 100%;
         max-width: 1100px;
         margin: 0 auto;
-        padding: 2rem 1.25rem 4rem;
+        padding: 2rem clamp(1rem, 4vw, 1.5rem) 4rem;
       }
 
       header.hero {
@@ -103,12 +113,18 @@
       .grid {
         display: grid;
         gap: 1.25rem;
+        width: 100%;
+        min-width: 0;
+      }
+
+      .grid-2 {
+        grid-template-columns: 1fr;
+        align-items: start;
       }
 
       @media (min-width: 900px) {
         .grid-2 {
-          grid-template-columns: 340px 1fr;
-          align-items: start;
+          grid-template-columns: minmax(260px, 340px) minmax(0, 1fr);
         }
       }
 
@@ -118,6 +134,13 @@
         border-radius: var(--radius);
         padding: 1.35rem 1.35rem 1.5rem;
         box-shadow: var(--shadow);
+        min-width: 0;
+        max-width: 100%;
+      }
+
+      #out {
+        min-width: 0;
+        max-width: 100%;
       }
 
       .card h2 {
@@ -223,6 +246,14 @@
         border: 1px solid var(--border);
         font-size: 0.92rem;
         margin-bottom: 1rem;
+        max-width: 100%;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+      }
+
+      .alert code {
+        overflow-wrap: anywhere;
+        word-break: break-all;
       }
 
       .alert.warn {
@@ -244,9 +275,23 @@
 
       .kv {
         display: grid;
-        grid-template-columns: 140px 1fr;
+        grid-template-columns: minmax(5.5rem, 7.5rem) minmax(0, 1fr);
         gap: 0.5rem 1rem;
         font-size: 0.92rem;
+      }
+
+      @media (max-width: 520px) {
+        .kv {
+          grid-template-columns: 1fr;
+        }
+
+        .kv dt {
+          margin-top: 0.35rem;
+        }
+
+        .kv dt:first-of-type {
+          margin-top: 0;
+        }
       }
 
       .kv dt {
@@ -265,6 +310,91 @@
         gap: 0.65rem;
       }
 
+      .post-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(min(148px, 100%), 1fr));
+        gap: 0.75rem;
+        margin-top: 0.5rem;
+        width: 100%;
+        min-width: 0;
+      }
+
+      .post-tile {
+        position: relative;
+        aspect-ratio: 1;
+        border-radius: 12px;
+        overflow: hidden;
+        border: 1px solid var(--border);
+        background: linear-gradient(145deg, var(--elevated), #121822);
+        display: block;
+        text-decoration: none;
+        color: var(--text);
+        transition: transform 0.12s ease, box-shadow 0.12s ease;
+      }
+
+      .post-tile:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
+        outline: 2px solid rgba(225, 48, 108, 0.45);
+        outline-offset: 0;
+      }
+
+      .post-tile img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+
+      .post-tile .tile-cap {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        padding: 0.4rem 0.5rem;
+        font-size: 0.72rem;
+        font-weight: 600;
+        background: linear-gradient(transparent, rgba(0, 0, 0, 0.75));
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.35rem;
+      }
+
+      .post-tile .tile-cap code {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.68rem;
+        opacity: 0.95;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        max-width: 100%;
+        background: transparent;
+        color: inherit;
+      }
+
+      .post-tile .tile-fallback {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.35rem;
+        padding: 0.5rem;
+        text-align: center;
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: var(--muted);
+      }
+
+      .post-tile .tile-fallback span {
+        font-size: 0.7rem;
+        font-weight: 500;
+        color: #9cc8ff;
+      }
+
       .post-item {
         display: flex;
         gap: 0.75rem;
@@ -273,6 +403,8 @@
         border-radius: 10px;
         background: var(--elevated);
         border: 1px solid var(--border);
+        min-width: 0;
+        max-width: 100%;
       }
 
       .post-item .idx {
@@ -280,11 +412,15 @@
         font-size: 0.8rem;
         color: var(--muted);
         min-width: 1.75rem;
+        flex-shrink: 0;
       }
 
       .post-item a {
-        word-break: break-all;
+        word-break: break-word;
+        overflow-wrap: anywhere;
         font-size: 0.9rem;
+        min-width: 0;
+        max-width: 100%;
       }
 
       .json-toggle {
@@ -304,10 +440,20 @@
         background: #0a0d12;
         border: 1px solid var(--border);
         overflow: auto;
-        max-height: 360px;
+        overflow-x: auto;
+        max-width: 100%;
+        max-height: min(50vh, 360px);
         font-family: "JetBrains Mono", monospace;
         font-size: 0.78rem;
         line-height: 1.45;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+      }
+
+      details.json-toggle {
+        max-width: 100%;
+        min-width: 0;
       }
 
       .skeleton {
@@ -337,13 +483,15 @@
         flex-wrap: wrap;
         gap: 0.75rem 1.25rem;
         justify-content: space-between;
+        max-width: 100%;
+        overflow-wrap: anywhere;
       }
     </style>
   </head>
   <body>
     <div class="wrap">
       <header class="hero">
-        <span class="badge">Proyecto · scraping responsable</span>
+        <span class="badge">Proyecto · scraping responsable Jefferson Albuja</span>
         <h1>Extractor de perfil público</h1>
         <p class="lede">
           Ingresá un nombre de usuario válido. El sistema intenta primero en modo
@@ -372,6 +520,12 @@
               <input id="minPosts" name="minPosts" type="number" min="1" max="30" value="10" />
               <button class="primary" type="submit" id="btn">Obtener datos</button>
             </div>
+            <label
+              style="margin-top: 1rem; display: flex; align-items: center; gap: 0.5rem; cursor: pointer; font-weight: 600; color: var(--muted)"
+            >
+              <input id="fetchMedia" name="fetchMedia" type="checkbox" checked style="width: auto; min-width: auto" />
+              Descargar vista previa por publicación (más lento; guarda imágenes en <code>data/images</code> y JSON)
+            </label>
             <p class="hint">
               Documentación paso a paso:
               <a href="/docs.html">docs.html</a>
@@ -412,6 +566,18 @@
           .replace(/"/g, "&quot;");
       }
 
+      /** URL de vista previa pública (puede fallar si Instagram bloquea hotlink). */
+      function igMediaPreviewUrl(postUrl) {
+        const m = String(postUrl).match(/instagram\.com\/(p|reel)\/([^/?#]+)/i);
+        if (!m) return null;
+        return `https://www.instagram.com/${m[1]}/${m[2]}/media/?size=m`;
+      }
+
+      function shortcodeFromPostUrl(postUrl) {
+        const m = String(postUrl).match(/\/(?:p|reel)\/([^/?#]+)/i);
+        return m ? m[1] : "";
+      }
+
       function setLoading(loading) {
         btn.disabled = loading;
         if (loading) {
@@ -438,6 +604,22 @@
         if (data.hint) {
           html += `<div class="alert warn"><strong>Sugerencia:</strong> ${esc(data.hint)}</div>`;
         }
+        if (data.mediaError) {
+          html += `<div class="alert err"><strong>Medios:</strong> ${esc(data.mediaError.message)}${
+            data.mediaError.hint ? " — " + esc(data.mediaError.hint) : ""
+          }</div>`;
+        }
+        if (data.dataExport) {
+          html += `<div class="alert warn" style="border-color:rgba(61,214,140,0.35);color:#b8f5d0"><strong>Export:</strong> ${esc(
+            data.dataExport.note
+          )} Archivo: <code>${esc(data.dataExport.jsonPath)}</code>${
+            data.stats && data.stats.mediaFilesWritten != null
+              ? ` · Imágenes guardadas: ${esc(String(data.stats.mediaFilesWritten))}/${esc(
+                  String(data.stats.mediaEnriched || 0)
+                )}`
+              : ""
+          }</div>`;
+        }
 
         const p = data.profile || {};
         html += `<div class="profile-block">
@@ -457,18 +639,48 @@
         </div>`;
 
         const posts = data.posts || [];
+        const postsDetail = data.postsDetail || [];
         html += `<h3 style="margin:1.25rem 0 0.5rem;font-size:1rem">Publicaciones (${posts.length})</h3>`;
         if (!posts.length) {
           html += `<p style="color:var(--muted);margin:0">No se obtuvieron enlaces de publicaciones.</p>`;
         } else {
-          html += `<div class="posts">${posts
+          html += `<div class="post-grid">${posts
+            .map((url, i) => {
+              const d = postsDetail[i];
+              const localSrc =
+                d && d.image_path ? `/${String(d.image_path).replace(/^\/+/, "")}` : null;
+              const preview = localSrc || igMediaPreviewUrl(url);
+              const code = shortcodeFromPostUrl(url) || "—";
+              const kind = /\/reel\//i.test(url) ? "Reel" : "Post";
+              const cap = `<div class="tile-cap"><span>${esc(kind)}</span><code>${esc(code)}</code></div>`;
+              if (preview) {
+                return `<a class="post-tile" href="${esc(url)}" target="_blank" rel="noopener" title="${esc(
+                  d && d.caption ? d.caption : url
+                )}">
+                  <img src="${esc(preview)}" alt="" loading="lazy" decoding="async" onerror="var p=this.parentNode,f=p&amp;&amp;p.querySelector('.tile-fallback');this.remove();if(f)f.style.display='flex';" />
+                  <div class="tile-fallback" style="display:none"><div>${i + 1}</div><span>Abrir en Instagram</span></div>
+                  ${cap}
+                </a>`;
+              }
+              return `<a class="post-tile" href="${esc(url)}" target="_blank" rel="noopener">
+                <div class="tile-fallback"><div>${i + 1}</div><span>Abrir en Instagram</span></div>
+                ${cap}
+              </a>`;
+            })
+            .join("")}</div>`;
+          html += `<p style="margin:0.85rem 0 0;font-size:0.82rem;color:var(--muted)">${
+            postsDetail.length
+              ? "Miniaturas desde archivos locales o CDN. "
+              : ""
+          }Si no ves imagen, abrí el tile en Instagram. Texto largo (caption) y métricas (likes, fecha) casi no vienen en las meta tags públicas; para eso haría falta otra estrategia (API oficial o análisis más profundo de la página).</p>`;
+          html += `<details style="margin-top:0.75rem"><summary style="cursor:pointer;font-weight:600;color:var(--muted);font-size:0.88rem">Enlaces (lista)</summary><div class="posts" style="margin-top:0.5rem">${posts
             .map(
               (url, i) =>
                 `<div class="post-item"><span class="idx">${i + 1}</span><a href="${esc(
                   url
                 )}" target="_blank" rel="noopener">${esc(url)}</a></div>`
             )
-            .join("")}</div>`;
+            .join("")}</div></details>`;
         }
 
         html += `<details class="json-toggle"><summary>JSON completo (para revisión / informe)</summary><pre>${esc(
@@ -482,12 +694,18 @@
         e.preventDefault();
         const username = document.getElementById("username").value.trim();
         const minPosts = Number(document.getElementById("minPosts").value || 10);
+        const fetchMedia = document.getElementById("fetchMedia").checked;
         setLoading(true);
         try {
           const res = await fetch("/api/scrape", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ username, minPosts }),
+            body: JSON.stringify({
+              username,
+              minPosts,
+              fetchMedia,
+              maxMediaFetch: minPosts,
+            }),
           });
           const data = await res.json();
           render(data);

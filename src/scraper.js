@@ -122,11 +122,88 @@ async function gentleScroll(page) {
   }
 }
 
+async function extractPostMetaFromPage(page) {
+  return page.evaluate(() => {
+    const pick = (sel) =>
+      document.querySelector(sel)?.getAttribute("content")?.trim() || "";
+    const ogImage = pick('meta[property="og:image"]');
+    const ogDesc = pick('meta[property="og:description"]');
+    const ogTitle = pick('meta[property="og:title"]');
+    return {
+      mediaUrl: ogImage || null,
+      caption: ogDesc || "",
+      ogTitle: ogTitle || "",
+    };
+  });
+}
+
+function extFromContentType(ct) {
+  const s = String(ct || "").toLowerCase();
+  if (s.includes("webp")) return "webp";
+  if (s.includes("png")) return "png";
+  if (s.includes("jpeg") || s.includes("jpg")) return "jpg";
+  return "jpg";
+}
+
+/**
+ * Abre cada URL de publicación, lee og:image / og:description y guarda la imagen en disco.
+ * Requiere la misma sesión de Playwright (cookies) para muchos CDN de Instagram.
+ */
+async function enrichPostsWithLocalMedia(page, postUrls, { maxFetch, dataRoot }) {
+  const imgDir = path.join(dataRoot, "images");
+  fs.mkdirSync(imgDir, { recursive: true });
+
+  const subset = postUrls.slice(0, maxFetch);
+  const detail = [];
+
+  for (let i = 0; i < subset.length; i++) {
+    const postUrl = subset[i];
+    const row = {
+      post_url: postUrl,
+      caption: "",
+      media_url: "",
+      image_path: "",
+      date: "",
+      likes: "",
+    };
+
+    try {
+      await page.goto(postUrl, { waitUntil: "domcontentloaded", timeout: 35000 });
+      await sleep(450 + Math.random() * 350);
+      const meta = await extractPostMetaFromPage(page);
+      row.caption = meta.caption || "";
+      row.media_url = meta.mediaUrl || "";
+
+      if (meta.mediaUrl) {
+        const res = await page.request.get(meta.mediaUrl);
+        if (res.ok()) {
+          const buf = await res.body();
+          const ext = extFromContentType(res.headers()["content-type"]);
+          const filename = `post_${i}.${ext}`;
+          fs.writeFileSync(path.join(imgDir, filename), buf);
+          row.image_path = path.join("data", "images", filename).replace(/\\/g, "/");
+        }
+      }
+    } catch (err) {
+      row.scrape_error = err?.message || String(err);
+    }
+
+    detail.push(row);
+  }
+
+  const latestPath = path.join(dataRoot, "latest_posts.json");
+  fs.writeFileSync(latestPath, JSON.stringify(detail, null, 2), "utf8");
+
+  return detail;
+}
+
 async function runOnce(username, options) {
   const {
     storageStatePath = null,
     minPosts = 10,
     modeLabel = "anonymous",
+    fetchMedia = false,
+    maxMediaFetch = 10,
   } = options;
 
   const launchOptions = {
@@ -230,6 +307,34 @@ async function runOnce(username, options) {
       }
     }
 
+    const mediaCap = Math.min(
+      Math.max(Number(maxMediaFetch) || 10, 1),
+      30,
+      posts.length
+    );
+
+    if (fetchMedia && result.ok && posts.length > 0) {
+      const dataRoot = path.join(process.cwd(), "data");
+      try {
+        result.postsDetail = await enrichPostsWithLocalMedia(page, posts, {
+          maxFetch: mediaCap,
+          dataRoot,
+        });
+        const saved = (result.postsDetail || []).filter((r) => r.image_path).length;
+        result.stats.mediaEnriched = result.postsDetail.length;
+        result.stats.mediaFilesWritten = saved;
+        result.dataExport = {
+          jsonPath: path.join("data", "latest_posts.json").replace(/\\/g, "/"),
+          note: "Imágenes y JSON guardados en la carpeta data/ del proyecto; servidos en /data/...",
+        };
+      } catch (err) {
+        result.mediaError = {
+          message: err?.message || String(err),
+          hint: "Probá con npm run auth:setup o reducí la cantidad de publicaciones.",
+        };
+      }
+    }
+
     return result;
   } finally {
     await browser.close();
@@ -239,6 +344,8 @@ async function runOnce(username, options) {
 async function scrapeProfile(usernameInput, opts = {}) {
   const username = normalizeUsername(usernameInput);
   const minPosts = Math.min(Math.max(Number(opts.minPosts) || 10, 1), 30);
+  const fetchMedia = Boolean(opts.fetchMedia);
+  const maxMediaFetch = Math.min(Math.max(Number(opts.maxMediaFetch) || 10, 1), 30);
   const storagePath =
     opts.storageStatePath ||
     process.env.STORAGE_STATE_PATH ||
@@ -248,6 +355,8 @@ async function scrapeProfile(usernameInput, opts = {}) {
     storageStatePath: null,
     minPosts,
     modeLabel: "anonymous",
+    fetchMedia,
+    maxMediaFetch,
   });
 
   const needRetry =
@@ -260,6 +369,8 @@ async function scrapeProfile(usernameInput, opts = {}) {
       storageStatePath: storagePath,
       minPosts,
       modeLabel: "cookies",
+      fetchMedia,
+      maxMediaFetch,
     });
     withCookies.fallbackFrom = "anonymous";
     return withCookies;
