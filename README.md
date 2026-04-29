@@ -18,6 +18,6 @@ Copiá `.env.example` a `.env` si necesitás cambiar puerto o la ruta del archiv
 
 ## Documentación en GitHub Pages
 
-La carpeta `docs/` contiene la misma guía en `index.html` para publicarla como sitio estático: en el repo de GitHub, **Settings → Pages → Branch `main`, folder `/docs`**. La URL será `https://<usuario>.github.io/<repo>/`.
+La carpeta `docs/` contiene la misma guía en `index.html` para publicarla como sitio estático: en el repo de GitHub, **Settings → Pages → Branch `main`, folder `/docs`**. La URL será `https://cheffopiu.github.io/webscraping/`.
 
 Eso **no** ejecuta el scraping en la nube: solo muestra el manual. La app interactiva sigue siendo `npm start` en tu PC (o un deploy con Node + Playwright en otro proveedor).
